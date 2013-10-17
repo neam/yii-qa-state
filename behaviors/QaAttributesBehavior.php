@@ -42,7 +42,20 @@ class QaAttributesBehavior extends CActiveRecordBehavior
      */
     public function qaAttributes()
     {
-        // todo - populate from validation rules
+
+        $finalStatus = $this->statuses[count($this->statuses) - 1];
+
+        // those that are part of the final status will include all attributes
+        $attributes = array();
+        foreach ($this->owner->validatorList as $validator) {
+            if (!in_array($finalStatus, $validator->on)) {
+                continue;
+            }
+            $attributes = array_merge($attributes, $validator->attributes);
+        }
+
+        $this->qaAttributes = $attributes;
+
         return $this->qaAttributes;
     }
 
