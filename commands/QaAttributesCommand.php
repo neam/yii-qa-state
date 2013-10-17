@@ -139,35 +139,60 @@ class QaAttributesCommand extends CConsoleCommand
 
             }
 
-            // todo - add status
-            // todo - add progress fields
-            // todo - add flags
-            // todo - add attribute approval fields
-            // todo - add attribute proof fields
+            // add status column
+            if (!$this->_checkTableAndColumnExists($relationTable, 'status')) {
 
-            /*
-            foreach ($model->qaAttributes() as $attribute) {
+                $this->up[] = '$this->addColumn(\'' . $relationTable . '\', \'' . 'status'
+                    . '\', \'VARCHAR(255) NULL\');';
+                $this->down[] = '$this->dropColumn(\'' . $relationTable . '\', \'' . 'status' . '\');';
 
-                foreach ($this->languages as $lang) {
-                    $this->d("\t\t$lang: ");
-                    $this->_processAttribute($lang, $model, $attribute);
-                }
-                $this->d("\n");
             }
-            */
+
+            // progress fields
+            foreach ($model->qaAttributesBehavior()->statuses as $status) {
+                $this->ensureColumn($relationTable, $status . '_validation_progress', 'BOOLEAN NULL');
+            }
+            $this->ensureColumn($relationTable, 'approval_progress', 'INT NULL');
+            $this->ensureColumn($relationTable, 'proofing_progress', 'INT NULL');
+
+            // translations progress fields
+            foreach ($model->qaAttributesBehavior()->statuses as $status) {
+                $this->ensureColumn($relationTable, 'translations_' . $status . '_validation_progress', 'INT NULL');
+            }
+            $this->ensureColumn($relationTable, 'translations_approval_progress', 'INT NULL');
+            $this->ensureColumn($relationTable, 'translations_proofing_progress', 'INT NULL');
+
+            // add flags
+            foreach ($model->qaAttributesBehavior()->manualFlags as $manualFlag) {
+                $this->ensureColumn($relationTable, $manualFlag, 'BOOLEAN NULL');
+            }
+
+            // add attribute approval fields
+            foreach ($model->qaAttributesBehavior()->qaAttributes() as $attribute) {
+                $this->ensureColumn($relationTable, $attribute . '_approved', 'BOOLEAN NULL');
+            }
+
+            // add attribute proof fields
+            foreach ($model->qaAttributesBehavior()->qaAttributes() as $attribute) {
+                $this->ensureColumn($relationTable, $attribute . '_proofed', 'BOOLEAN NULL');
+            }
+
+            // todo - check for fields added by earlier versions of this command
         }
 
         $this->_createMigrationFile();
     }
 
-    /**
-     * @param $lang
-     * @param $model
-     */
-    protected function _processAttribute($lang, $model, $attribute)
+    protected function ensureColumn($table, $column, $type)
     {
 
-        // todo
+        if (!$this->_checkTableAndColumnExists($table, $column)) {
+
+            $this->up[] = '$this->addColumn(\'' . $table . '\', \'' . $column
+                . '\', \'' . $type . '\');';
+            $this->down[] = '$this->dropColumn(\'' . $table . '\', \'' . $column . '\');';
+
+        }
 
     }
 
@@ -179,6 +204,17 @@ class QaAttributesCommand extends CConsoleCommand
     protected function _checkColumnExists($model, $column)
     {
         return isset($model->metaData->columns[$column]);
+    }
+
+    /**
+     * @param $model
+     * @param $column
+     * @return bool
+     */
+    protected function _checkTableAndColumnExists($table, $column)
+    {
+        $tables = Yii::app()->db->schema->getTables();
+        return isset($tables[$table]) && isset($tables[$table]->columns[$column]);
     }
 
     /**

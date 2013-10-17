@@ -47,6 +47,15 @@ class QaAttributesBehavior extends CActiveRecordBehavior
     }
 
     /**
+     * Expose behavior
+     * @return array
+     */
+    public function & qaAttributesBehavior()
+    {
+        return $this;
+    }
+
+    /**
      * @param CActiveRecord $owner
      * @throws Exception
      */
