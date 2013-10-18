@@ -103,6 +103,13 @@ class QaAttributesCommand extends CConsoleCommand
             $relationTable = $model->tableName() . "_qa_state";
             $relationField = $relationTable . "_id";
 
+            $qaAttributes = $model->qaAttributesBehavior()->qaAttributes();
+
+            // Do not activate for models without any attributes to include in the qa process
+            if (empty($qaAttributes)) {
+                continue;
+            }
+
             // Ensure there is a table
             $tables = Yii::app()->db->schema->getTables();
             if (!isset($tables[$relationTable])) {
@@ -168,12 +175,12 @@ class QaAttributesCommand extends CConsoleCommand
             }
 
             // add attribute approval fields
-            foreach ($model->qaAttributesBehavior()->qaAttributes() as $attribute) {
+            foreach ($qaAttributes as $attribute) {
                 $this->ensureColumn($relationTable, $attribute . '_approved', 'BOOLEAN NULL');
             }
 
             // add attribute proof fields
-            foreach ($model->qaAttributesBehavior()->qaAttributes() as $attribute) {
+            foreach ($qaAttributes as $attribute) {
                 $this->ensureColumn($relationTable, $attribute . '_proofed', 'BOOLEAN NULL');
             }
 

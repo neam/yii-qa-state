@@ -69,6 +69,18 @@ class QaAttributesBehavior extends CActiveRecordBehavior
     }
 
     /**
+     * Expose qa state object relation
+     */
+    public function qaState()
+    {
+
+        $class = $this->qaStateClass();
+        $relation = lcfirst($class);
+        return $this->owner->{$relation};
+
+    }
+
+    /**
      * @param CActiveRecord $owner
      * @throws Exception
      */
@@ -91,23 +103,81 @@ class QaAttributesBehavior extends CActiveRecordBehavior
     {
 
         $relationField = $this->owner->tableName() . "_qa_state_id";
-        $this->initiateAuthoringState($relationField);
+
+        $behaviors = $this->owner->behaviors();
+
+        // Check i18n-columns if multilingual attribute
+        if (isset($behaviors['i18n-columns']['translationAttributes'][$relationField])) {
+
+            // One for each language
+            foreach (Yii::app()->langHandler->languages as $lang) {
+
+                $attribute = $relationField . $lang;
+                $this->initiateQaState($attribute);
+
+            }
+
+        } else {
+
+            $this->initiateQaState($relationField);
+
+        }
 
     }
 
-    private function initiateQaState($attribute, $name)
+    private function initiateQaState($attribute)
     {
 
         if (!is_null($this->owner->$attribute)) {
             return;
         }
 
-        // todo
-        $id = null;
+        $class = $this->qaStateClass();
+
+        $qaState = new $class();
+        if (!$qaState->save()) {
+            throw new SaveException();
+        }
+
+        $id = $qaState->id;
 
         // Store the qa state record id in the current item
         $this->owner->$attribute = $id;
 
     }
+
+    protected function qaStateClass()
+    {
+
+        return get_class($this->owner) . "QaState";
+
+    }
+
+    public function recalculateProgress()
+    {
+
+        // Set app language temporarily to whatever language we want to validate with
+        // Revert to original app language
+
+        $model =& $this->owner;
+
+        // Check draft progress
+        $model->scenario = 'draft';
+        $model->validate();
+
+        // Check preview progress
+        $model->scenario = 'preview';
+        $model->validate();
+
+        // Check publish progress
+        $model->scenario = 'publish';
+        $model->validate();
+
+    }
+
+    public function refreshQaState()
+    {
+    }
+
 
 }
