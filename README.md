@@ -1,5 +1,5 @@
-Yii QA Attributes
--------------------
+Yii Extension: QaState
+==========================
 
 What is it for:
 Tools to help tracks the progress of entering, approval and proofreading of one or many attributes, as is necessary for

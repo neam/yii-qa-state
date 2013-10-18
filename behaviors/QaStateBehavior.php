@@ -1,13 +1,13 @@
 <?php
 
 /**
- * QaAttributesBehavior
+ * QaStateBehavior
  *
  * @uses CActiveRecordBehavior
  * @license MIT
- * @author See https://github.com/neam/yii-qa-attributes/graphs/contributors
+ * @author See https://github.com/neam/yii-qa-state/graphs/contributors
  */
-class QaAttributesBehavior extends CActiveRecordBehavior
+class QaStateBehavior extends CActiveRecordBehavior
 {
 
     /**
@@ -63,7 +63,7 @@ class QaAttributesBehavior extends CActiveRecordBehavior
      * Expose behavior
      * @return array
      */
-    public function & qaAttributesBehavior()
+    public function & qaStateBehavior()
     {
         return $this;
     }

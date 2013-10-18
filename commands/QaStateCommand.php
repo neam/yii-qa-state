@@ -1,16 +1,16 @@
 <?php
 
 /**
- * AuthoringStateCommand
+ * QaStateCommand
  *
- * Generates authoring state table schemas for
+ * Generates qa state table schemas
  *
  * @uses CConsoleCommand
  * @license MIT
- * @author See https://github.com/neam/yii-i18n-columns/graphs/contributors
+ * @author See https://github.com/neam/yii-qa-state/graphs/contributors
  */
 
-class QaAttributesCommand extends CConsoleCommand
+class QaStateCommand extends CConsoleCommand
 {
     /**
      * @var string
@@ -103,7 +103,7 @@ class QaAttributesCommand extends CConsoleCommand
             $relationTable = $model->tableName() . "_qa_state";
             $relationField = $relationTable . "_id";
 
-            $qaAttributes = $model->qaAttributesBehavior()->qaAttributes();
+            $qaAttributes = $model->qaStateBehavior()->qaAttributes();
 
             // Do not activate for models without any attributes to include in the qa process
             if (empty($qaAttributes)) {
@@ -156,21 +156,21 @@ class QaAttributesCommand extends CConsoleCommand
             }
 
             // progress fields
-            foreach ($model->qaAttributesBehavior()->statuses as $status) {
+            foreach ($model->qaStateBehavior()->statuses as $status) {
                 $this->ensureColumn($relationTable, $status . '_validation_progress', 'BOOLEAN NULL');
             }
             $this->ensureColumn($relationTable, 'approval_progress', 'INT NULL');
             $this->ensureColumn($relationTable, 'proofing_progress', 'INT NULL');
 
             // translations progress fields
-            foreach ($model->qaAttributesBehavior()->statuses as $status) {
+            foreach ($model->qaStateBehavior()->statuses as $status) {
                 $this->ensureColumn($relationTable, 'translations_' . $status . '_validation_progress', 'INT NULL');
             }
             $this->ensureColumn($relationTable, 'translations_approval_progress', 'INT NULL');
             $this->ensureColumn($relationTable, 'translations_proofing_progress', 'INT NULL');
 
             // add flags
-            foreach ($model->qaAttributesBehavior()->manualFlags as $manualFlag) {
+            foreach ($model->qaStateBehavior()->manualFlags as $manualFlag) {
                 $this->ensureColumn($relationTable, $manualFlag, 'BOOLEAN NULL');
             }
 
@@ -303,9 +303,9 @@ class ' . $migrationName . ' extends CDbMigration
                         $model = new $fileClassName;
                         if (method_exists($model, 'behaviors')) {
                             $behaviors = $model->behaviors();
-                            if (isset($behaviors['qa-attributes']) && strpos(
-                                    $behaviors['qa-attributes']['class'],
-                                    'QaAttributesBehavior'
+                            if (isset($behaviors['qa-state']) && strpos(
+                                    $behaviors['qa-state']['class'],
+                                    'QaStateBehavior'
                                 ) !== false
                             ) {
                                 $models[$classname] = $model;
