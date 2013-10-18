@@ -23,6 +23,13 @@ class QaStateCommand extends CConsoleCommand
     public $models = array();
 
     /**
+     * Source language
+     *
+     * @var string
+     */
+    public $sourceLanguage;
+
+    /**
      * @var array
      */
     public $up = array();
@@ -98,6 +105,7 @@ class QaStateCommand extends CConsoleCommand
         $this->d("Creating the migration...\n");
         foreach ($this->models as $modelName => $model) {
             $this->d("\t...$modelName: \n");
+
             $behaviors = $model->behaviors();
 
             $relationTable = $model->tableName() . "_qa_state";
@@ -122,7 +130,7 @@ class QaStateCommand extends CConsoleCommand
             }
 
             // Ensure there is a field for the qa_state table fk
-            if (!$this->_checkColumnExists($model, $relationField)) {
+            if (!$this->_checkTableAndColumnExists($behaviors, $model->tableName(), $relationField)) {
 
                 $this->up[] = '$this->addColumn(\'' . $model->tableName() . '\', \'' . $relationField
                     . '\', \'BIGINT NULL\');';
@@ -147,7 +155,7 @@ class QaStateCommand extends CConsoleCommand
             }
 
             // add status column
-            if (!$this->_checkTableAndColumnExists($relationTable, 'status')) {
+            if (!$this->_checkTableAndColumnExists($behaviors, $relationTable, 'status')) {
 
                 $this->up[] = '$this->addColumn(\'' . $relationTable . '\', \'' . 'status'
                     . '\', \'VARCHAR(255) NULL\');';
@@ -157,31 +165,31 @@ class QaStateCommand extends CConsoleCommand
 
             // progress fields
             foreach ($model->qaStateBehavior()->statuses as $status) {
-                $this->ensureColumn($relationTable, $status . '_validation_progress', 'BOOLEAN NULL');
+                $this->ensureColumn($behaviors, $relationTable, $status . '_validation_progress', 'BOOLEAN NULL');
             }
-            $this->ensureColumn($relationTable, 'approval_progress', 'INT NULL');
-            $this->ensureColumn($relationTable, 'proofing_progress', 'INT NULL');
+            $this->ensureColumn($behaviors, $relationTable, 'approval_progress', 'INT NULL');
+            $this->ensureColumn($behaviors, $relationTable, 'proofing_progress', 'INT NULL');
 
             // translations progress fields
             foreach ($model->qaStateBehavior()->statuses as $status) {
-                $this->ensureColumn($relationTable, 'translations_' . $status . '_validation_progress', 'INT NULL');
+                $this->ensureColumn($behaviors, $relationTable, 'translations_' . $status . '_validation_progress', 'INT NULL');
             }
-            $this->ensureColumn($relationTable, 'translations_approval_progress', 'INT NULL');
-            $this->ensureColumn($relationTable, 'translations_proofing_progress', 'INT NULL');
+            $this->ensureColumn($behaviors, $relationTable, 'translations_approval_progress', 'INT NULL');
+            $this->ensureColumn($behaviors, $relationTable, 'translations_proofing_progress', 'INT NULL');
 
             // add flags
             foreach ($model->qaStateBehavior()->manualFlags as $manualFlag) {
-                $this->ensureColumn($relationTable, $manualFlag, 'BOOLEAN NULL');
+                $this->ensureColumn($behaviors, $relationTable, $manualFlag, 'BOOLEAN NULL');
             }
 
             // add attribute approval fields
             foreach ($qaAttributes as $attribute) {
-                $this->ensureColumn($relationTable, $attribute . '_approved', 'BOOLEAN NULL');
+                $this->ensureColumn($behaviors, $relationTable, $attribute . '_approved', 'BOOLEAN NULL');
             }
 
             // add attribute proof fields
             foreach ($qaAttributes as $attribute) {
-                $this->ensureColumn($relationTable, $attribute . '_proofed', 'BOOLEAN NULL');
+                $this->ensureColumn($behaviors, $relationTable, $attribute . '_proofed', 'BOOLEAN NULL');
             }
 
             // todo - check for fields added by earlier versions of this command
@@ -190,10 +198,10 @@ class QaStateCommand extends CConsoleCommand
         $this->_createMigrationFile();
     }
 
-    protected function ensureColumn($table, $column, $type)
+    protected function ensureColumn($behaviors, $table, $column, $type)
     {
 
-        if (!$this->_checkTableAndColumnExists($table, $column)) {
+        if (!$this->_checkTableAndColumnExists($behaviors, $table, $column)) {
 
             $this->up[] = '$this->addColumn(\'' . $table . '\', \'' . $column
                 . '\', \'' . $type . '\');';
@@ -218,10 +226,11 @@ class QaStateCommand extends CConsoleCommand
      * @param $column
      * @return bool
      */
-    protected function _checkTableAndColumnExists($table, $column)
+    protected function _checkTableAndColumnExists($behaviors, $table, $column)
     {
         $tables = Yii::app()->db->schema->getTables();
-        return isset($tables[$table]) && isset($tables[$table]->columns[$column]);
+        // The column does not exist if the table does not exist. The column may be supplied by i18n-columns behavior.
+        return isset($tables[$table]) && (isset($tables[$table]->columns[$column]) || in_array($column, $behaviors['i18n-columns']['translationAttributes']));
     }
 
     /**
@@ -235,6 +244,30 @@ class QaStateCommand extends CConsoleCommand
         $isNull = $data->allowNull ? "null" : "not null";
 
         return $data->dbType . ' ' . $isNull;
+    }
+
+    /**
+     * Load languages from main config.
+     *
+     * @access protected
+     */
+    protected function _loadLanguages()
+    {
+        // Load main.php config file
+        $file = realpath(Yii::app()->basePath) . '/config/main.php';
+        if (!file_exists($file)) {
+            print("Config not found\n");
+            exit("Error loading config file $file.\n");
+        } else {
+            $config = require($file);
+            $this->d("Config loaded\n");
+        }
+
+        if (!isset($config['language'])) {
+            exit("Please, define a default language in the config file.\n");
+        }
+
+        $this->sourceLanguage = $config['language'];
     }
 
     /**
