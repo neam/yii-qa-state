@@ -1,0 +1,26 @@
+{
+    "name": "neam/yii-qa-state",
+    "description": "Transparent attribute translation for ActiveRecords, without requiring lookup tables for translated field contents.",
+    "keywords": ["yii", "qa", "workflow", "quality assurance"],
+    "homepage": "https://github.com/neam/yii-qa-state",
+    "type": "yii-extension",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Fredrik Wollsén",
+            "email": "fredrik@neam.se"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "http://packages.phundament.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.0.0",
+        "yiisoft/yii": ">=1.1.0"
+    },
+    "require-dev": {
+    }
+}
