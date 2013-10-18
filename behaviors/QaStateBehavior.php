@@ -40,15 +40,17 @@ class QaStateBehavior extends CActiveRecordBehavior
      * Populate qaAttributes from validation rules
      * @return array
      */
-    public function qaAttributes()
+    public function qaAttributes($status = null)
     {
 
-        $finalStatus = $this->statuses[count($this->statuses) - 1];
+        if (is_null($status)) {
+            // those that are part of the final status will include all attributes
+            $status = $this->statuses[count($this->statuses) - 1];
+        }
 
-        // those that are part of the final status will include all attributes
         $attributes = array();
         foreach ($this->owner->validatorList as $validator) {
-            if (!in_array($finalStatus, $validator->on)) {
+            if (!in_array($status, $validator->on)) {
                 continue;
             }
             $attributes = array_merge($attributes, $validator->attributes);
@@ -167,30 +169,56 @@ class QaStateBehavior extends CActiveRecordBehavior
 
     }
 
-    public function recalculateProgress()
+    public function calculateValidationProgress($status)
     {
 
-        // Set app language temporarily to whatever language we want to validate with
-        // Revert to original app language
+        // Work on a clone to not interfere with existing attributes and validation errors
+        $model = clone $this->owner;
+        $model->scenario = $status;
 
-        $model =& $this->owner;
+        // Count fields
+        $attributes = $this->qaAttributes($status);
+        $totalFields = count($attributes);
+        $validFields = 0;
 
-        // Check draft progress
-        $model->scenario = 'draft';
-        $model->validate();
+        // Validate each field individually
+        foreach ($attributes as $attribute) {
+            $valid = $model->validate(array($attribute));
+            if ($valid) {
+                $validFields++;
+            }
+        }
 
-        // Check preview progress
-        $model->scenario = 'preview';
-        $model->validate();
-
-        // Check publish progress
-        $model->scenario = 'publish';
-        $model->validate();
+        // Assign progress
+        $attribute = "{$status}_validation_progress";
+        $model->qaState()->$attribute = round($validFields / $totalFields * 100);
 
     }
 
-    public function refreshQaState()
+    public function refreshQaState($lang = null)
     {
+
+        // Set app language temporarily to whatever language we want to validate with
+        if (!is_null($lang)) {
+            $previousLang = Yii::app()->language;
+            Yii::app()->language = $lang;
+        }
+
+        // Check validation progress
+        foreach ($this->statuses as $status) {
+            $this->calculateValidationProgress($status);
+        }
+
+        // Save qa state
+        if (!$this->owner->qaState()->save()) {
+            throw new CException("Could not save qa state");
+        }
+
+        // Revert to original app language
+        if (!is_null($lang)) {
+            Yii::app()->language = $previousLang;
+        }
+
     }
 
 
