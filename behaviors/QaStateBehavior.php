@@ -69,15 +69,22 @@ class QaStateBehavior extends CActiveRecordBehavior
     }
 
     /**
-     * Expose qa state object relation
+     * Expose and ensure qa state object relation
      */
     public function qaState()
     {
 
         $class = $this->qaStateClass();
         $relation = lcfirst($class);
-        return $this->owner->{$relation};
 
+        // Ensure initiated qa state object relation
+        if (is_null($this->owner->{$relation})) {
+            $this->initiateQaState($this->qaStateAttribute());
+            $this->owner->save();
+            $this->owner->refresh();
+        }
+
+        return $this->owner->{$relation};
     }
 
     /**
@@ -102,7 +109,7 @@ class QaStateBehavior extends CActiveRecordBehavior
     protected function initiateQaStates()
     {
 
-        $relationField = $this->owner->tableName() . "_qa_state_id";
+        $relationField = $this->qaStateAttribute();
 
         $behaviors = $this->owner->behaviors();
 
@@ -125,7 +132,7 @@ class QaStateBehavior extends CActiveRecordBehavior
 
     }
 
-    private function initiateQaState($attribute)
+    protected function initiateQaState($attribute)
     {
 
         if (!is_null($this->owner->$attribute)) {
@@ -150,6 +157,13 @@ class QaStateBehavior extends CActiveRecordBehavior
     {
 
         return get_class($this->owner) . "QaState";
+
+    }
+
+    protected function qaStateAttribute()
+    {
+
+        return $this->owner->tableName() . "_qa_state_id";
 
     }
 
