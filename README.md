@@ -1,7 +1,7 @@
 Yii Extension: QaState
 ==========================
 
-Tools (a behavior and a console command) to track the progress between different qa statues, such as Draft, Preview and Public.
+Tools (a behavior and a console command) to track the progress between different qa statuses, such as Draft, Preview and Public.
 Intended to be used in content management systems to help track the creation and translation progress of the created content.
 
 Features
@@ -131,10 +131,10 @@ The schema has this general structure:
     {table}_qa_status
         id
         status - varchar values based on statuses: draft,preview,public
-        foreach scenario: {scenario}_validation_progress
+        foreach status: {status}_validation_progress
         approval_progress
         proofing_progress
-        foreach scenario: translations_{scenario}_validation_progress
+        foreach status: translations_{status}_validation_progress
         translations_approval_progress
         translations_proofing_progress
         foreach manualFlag: {manualFlag}
