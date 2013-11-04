@@ -48,17 +48,25 @@ class QaStateBehavior extends CActiveRecordBehavior
             $status = $this->statuses[count($this->statuses) - 1];
         }
 
+        $this->qaAttributes = $this->scenarioSpecificAttributes($status);
+
+        return $this->qaAttributes;
+    }
+
+    public function scenarioSpecificAttributes($scenario)
+    {
+
         $attributes = array();
+
         foreach ($this->owner->validatorList as $validator) {
-            if (!in_array($status, $validator->on)) {
+            if (!in_array($scenario, $validator->on)) {
                 continue;
             }
             $attributes = array_merge($attributes, $validator->attributes);
         }
 
-        $this->qaAttributes = $attributes;
+        return $attributes;
 
-        return $this->qaAttributes;
     }
 
     /**
@@ -169,15 +177,15 @@ class QaStateBehavior extends CActiveRecordBehavior
 
     }
 
-    public function calculateValidationProgress($status)
+    public function calculateValidationProgress($scenario)
     {
 
         // Work on a clone to not interfere with existing attributes and validation errors
         $model = clone $this->owner;
-        $model->scenario = $status;
+        $model->scenario = $scenario;
 
         // Count fields
-        $attributes = $this->qaAttributes($status);
+        $attributes = $this->scenarioSpecificAttributes($scenario);
         $totalFields = count($attributes);
         $validFields = 0;
 
@@ -189,9 +197,11 @@ class QaStateBehavior extends CActiveRecordBehavior
             }
         }
 
-        // Assign progress
-        $attribute = "{$status}_validation_progress";
-        $model->qaState()->$attribute = round($validFields / $totalFields * 100);
+        if ($totalFields == 0) {
+            throw new CException("The scenario '$scenario' has no associated validation rules");
+        }
+
+        return round($validFields / $totalFields * 100);
 
     }
 
@@ -205,8 +215,12 @@ class QaStateBehavior extends CActiveRecordBehavior
         }
 
         // Check validation progress
-        foreach ($this->statuses as $status) {
-            $this->calculateValidationProgress($status);
+        foreach ($this->statuses as $scenario) {
+            $progress = $this->calculateValidationProgress($scenario);
+            // Assign progress
+            $attribute = "{$scenario}_validation_progress";
+            $this->owner->qaState()->$attribute = $progress;
+
         }
 
         // Save qa state
