@@ -177,7 +177,40 @@ class QaStateBehavior extends CActiveRecordBehavior
 
     }
 
+    /**
+     * Like calculateInvalidFields() but instead returns a
+     * percentage 0-100 of the current validation
+     * progress.
+     * @param $scenario
+     * @return float
+     * @throws CException Thrown to prevent division with 0
+     */
     public function calculateValidationProgress($scenario)
+    {
+
+        // Count fields
+        $attributes = $this->scenarioSpecificAttributes($scenario);
+        $totalFields = count($attributes);
+
+        if ($totalFields == 0) {
+            throw new CException("The scenario '$scenario' has no associated validation rules");
+        }
+
+        $invalidFields = $this->calculateInvalidFields($scenario);
+        $validFields = $totalFields - $invalidFields;
+
+        return round($validFields / $totalFields * 100);
+
+    }
+
+    /**
+     * Steps through all of the fields that are validated in a specific
+     * scenario and returns a percentage 0-100 of the current validation
+     * progress
+     * @param $scenario
+     * @return int
+     */
+    public function calculateInvalidFields($scenario)
     {
 
         // Work on a clone to not interfere with existing attributes and validation errors
@@ -186,22 +219,17 @@ class QaStateBehavior extends CActiveRecordBehavior
 
         // Count fields
         $attributes = $this->scenarioSpecificAttributes($scenario);
-        $totalFields = count($attributes);
-        $validFields = 0;
+        $invalidFields = 0;
 
         // Validate each field individually
         foreach ($attributes as $attribute) {
             $valid = $model->validate(array($attribute));
-            if ($valid) {
-                $validFields++;
+            if (!$valid) {
+                $invalidFields++;
             }
         }
 
-        if ($totalFields == 0) {
-            throw new CException("The scenario '$scenario' has no associated validation rules");
-        }
-
-        return round($validFields / $totalFields * 100);
+        return $invalidFields;
 
     }
 
