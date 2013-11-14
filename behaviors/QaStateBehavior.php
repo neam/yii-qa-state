@@ -65,7 +65,7 @@ class QaStateBehavior extends CActiveRecordBehavior
             $attributes = array_merge($attributes, $validator->attributes);
         }
 
-        return $attributes;
+        return array_unique($attributes);
 
     }
 
