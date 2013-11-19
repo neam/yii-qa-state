@@ -88,9 +88,11 @@ class QaStateBehavior extends CActiveRecordBehavior
         $relation = lcfirst($class);
 
         // Ensure initiated qa state object relation
-        if (is_null($this->owner->{$relation})) {
+        if (is_null($this->owner->{$this->qaStateAttribute()})) {
             $this->initiateQaState($this->qaStateAttribute());
-            $this->owner->save();
+            if (!$this->owner->saveAttributes(array($this->qaStateAttribute() => $this->owner->{$this->qaStateAttribute()}))) {
+                throw new CException("Save failed. Errors: " . print_r($this->owner->errors, true));
+            }
             $this->owner->refresh();
         }
 
@@ -112,33 +114,7 @@ class QaStateBehavior extends CActiveRecordBehavior
     public function beforeSave($event)
     {
 
-        $this->initiateQaStates();
-
-    }
-
-    protected function initiateQaStates()
-    {
-
-        $relationField = $this->qaStateAttribute();
-
-        $behaviors = $this->owner->behaviors();
-
-        // Check i18n-columns if multilingual attribute
-        if (isset($behaviors['i18n-columns']['translationAttributes'][$relationField])) {
-
-            // One for each language
-            foreach (Yii::app()->langHandler->languages as $lang) {
-
-                $attribute = $relationField . $lang;
-                $this->initiateQaState($attribute);
-
-            }
-
-        } else {
-
-            $this->initiateQaState($relationField);
-
-        }
+        $this->initiateQaState($this->qaStateAttribute());
 
     }
 
@@ -153,7 +129,7 @@ class QaStateBehavior extends CActiveRecordBehavior
 
         $qaState = new $class();
         if (!$qaState->save()) {
-            throw new SaveException();
+            throw new CException("Save failed");
         }
 
         $id = $qaState->id;
@@ -172,9 +148,14 @@ class QaStateBehavior extends CActiveRecordBehavior
 
     protected function qaStateAttribute()
     {
+        $attribute = $this->owner->tableName() . "_qa_state_id";
 
-        return $this->owner->tableName() . "_qa_state_id";
+        $behaviors = $this->owner->behaviors();
+        if (isset($behaviors['i18n-columns']['translationAttributes']) && in_array($attribute, $behaviors['i18n-columns']['translationAttributes'])) {
+            $attribute .= "_" . Yii::app()->language;
+        }
 
+        return $attribute;
     }
 
     /**
