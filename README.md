@@ -1,12 +1,13 @@
 Yii Extension: QaState
 ==========================
 
-Tools (a behavior and a console command) to track the progress between different qa statuses, such as Draft, Preview and Public.
-Intended to be used in content management systems to help track the creation and translation progress of the created content.
+Tools (a behavior and a console command) to track proofreading and approval progress on a field-by-field basis.
+Used in content management systems to help track the creation and translation progress of the created content.
 
 Features
 --------
 
+ * Automatically sets the current item status (such as Draft, Preview and Public) based on validation rules.
  * Supplies a convenient place to store the approval and proofreading flags for attributes that are part of the content creation process
  * Methods to calculate and read the current validation, approval and proofreading progress
  * Transparent qa state records creation
@@ -38,13 +39,13 @@ Ensure that you have the following in your composer.json:
         ...
     ],
     "require":{
-        "neam/yii-qa-state":"@dev",
+        "neam/yii-qa-state":"dev-develop",
         ...
     },
 
 Then install through composer:
 
-    php composer.php install neam/yii-qa-state
+    php composer.php update neam/yii-qa-state
 
 If you don't use composer, clone or download this project into /path/to/your/app/vendor/neam/yii-qa-state
 
