@@ -164,7 +164,7 @@ class QaStateBehavior extends CActiveRecordBehavior
      * progress.
      * @param $scenario
      * @return float
-     * @throws CException Thrown to prevent division with 0
+     * @throws QaStateBehaviorNoAssociatedRulesException Thrown to prevent division with 0
      */
     public function calculateValidationProgress($scenario)
     {
@@ -174,7 +174,7 @@ class QaStateBehavior extends CActiveRecordBehavior
         $totalFields = count($attributes);
 
         if ($totalFields == 0) {
-            throw new CException("The scenario '$scenario' has no associated validation rules");
+            throw new QaStateBehaviorNoAssociatedRulesException("The scenario '$scenario' has no associated validation rules");
         }
 
         $invalidFields = $this->calculateInvalidFields($scenario);
@@ -244,5 +244,9 @@ class QaStateBehavior extends CActiveRecordBehavior
 
     }
 
+}
+
+class QaStateBehaviorNoAssociatedRulesException extends CException
+{
 
 }
