@@ -115,6 +115,7 @@ class QaStateCommand extends CConsoleCommand
 
             // Do not activate for models without any attributes to include in the qa process
             if (empty($qaAttributes)) {
+                $this->d("\t\tNote: $modelName has no attributes to include in the qa process - skipping...\n");
                 continue;
             }
 
