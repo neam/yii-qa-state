@@ -130,12 +130,9 @@ The schema has this general structure:
 
     {table}_qa_state
         id
-        foreach status: {status}_validation_progress
+        foreach scenario: {scenario}_validation_progress
         approval_progress
         proofing_progress
-        foreach status: translations_{status}_validation_progress
-        translations_approval_progress
-        translations_proofing_progress
         foreach manualFlag: {manualFlag}
         foreach attribute: {attribute}_approved - boolean (with null)
         foreach attribute: {attribute}_proofed - boolean (with null)
@@ -163,11 +160,6 @@ Sample migration file:
             $this->addColumn('chapter_qa_state', 'public_validation_progress', 'BOOLEAN NULL');
             $this->addColumn('chapter_qa_state', 'approval_progress', 'INT NULL');
             $this->addColumn('chapter_qa_state', 'proofing_progress', 'INT NULL');
-            $this->addColumn('chapter_qa_state', 'translations_draft_validation_progress', 'INT NULL');
-            $this->addColumn('chapter_qa_state', 'translations_preview_validation_progress', 'INT NULL');
-            $this->addColumn('chapter_qa_state', 'translations_public_validation_progress', 'INT NULL');
-            $this->addColumn('chapter_qa_state', 'translations_approval_progress', 'INT NULL');
-            $this->addColumn('chapter_qa_state', 'translations_proofing_progress', 'INT NULL');
             $this->addColumn('chapter_qa_state', 'previewing_welcome', 'BOOLEAN NULL');
             $this->addColumn('chapter_qa_state', 'candidate_for_public_status', 'BOOLEAN NULL');
             $this->addColumn('chapter_qa_state', 'title_approved', 'BOOLEAN NULL');
@@ -200,11 +192,6 @@ Sample migration file:
             $this->addColumn('video_file_qa_state', 'public_validation_progress', 'BOOLEAN NULL');
             $this->addColumn('video_file_qa_state', 'approval_progress', 'INT NULL');
             $this->addColumn('video_file_qa_state', 'proofing_progress', 'INT NULL');
-            $this->addColumn('video_file_qa_state', 'translations_draft_validation_progress', 'INT NULL');
-            $this->addColumn('video_file_qa_state', 'translations_preview_validation_progress', 'INT NULL');
-            $this->addColumn('video_file_qa_state', 'translations_public_validation_progress', 'INT NULL');
-            $this->addColumn('video_file_qa_state', 'translations_approval_progress', 'INT NULL');
-            $this->addColumn('video_file_qa_state', 'translations_proofing_progress', 'INT NULL');
             $this->addColumn('video_file_qa_state', 'previewing_welcome', 'BOOLEAN NULL');
             $this->addColumn('video_file_qa_state', 'candidate_for_public_status', 'BOOLEAN NULL');
             $this->addColumn('video_file_qa_state', 'title_approved', 'BOOLEAN NULL');
@@ -231,11 +218,6 @@ Sample migration file:
           $this->dropColumn('chapter_qa_state', 'public_validation_progress');
           $this->dropColumn('chapter_qa_state', 'approval_progress');
           $this->dropColumn('chapter_qa_state', 'proofing_progress');
-          $this->dropColumn('chapter_qa_state', 'translations_draft_validation_progress');
-          $this->dropColumn('chapter_qa_state', 'translations_preview_validation_progress');
-          $this->dropColumn('chapter_qa_state', 'translations_public_validation_progress');
-          $this->dropColumn('chapter_qa_state', 'translations_approval_progress');
-          $this->dropColumn('chapter_qa_state', 'translations_proofing_progress');
           $this->dropColumn('chapter_qa_state', 'previewing_welcome');
           $this->dropColumn('chapter_qa_state', 'candidate_for_public_status');
           $this->dropColumn('chapter_qa_state', 'title_approved');
@@ -265,11 +247,6 @@ Sample migration file:
           $this->dropColumn('video_file_qa_state', 'public_validation_progress');
           $this->dropColumn('video_file_qa_state', 'approval_progress');
           $this->dropColumn('video_file_qa_state', 'proofing_progress');
-          $this->dropColumn('video_file_qa_state', 'translations_draft_validation_progress');
-          $this->dropColumn('video_file_qa_state', 'translations_preview_validation_progress');
-          $this->dropColumn('video_file_qa_state', 'translations_public_validation_progress');
-          $this->dropColumn('video_file_qa_state', 'translations_approval_progress');
-          $this->dropColumn('video_file_qa_state', 'translations_proofing_progress');
           $this->dropColumn('video_file_qa_state', 'previewing_welcome');
           $this->dropColumn('video_file_qa_state', 'candidate_for_public_status');
           $this->dropColumn('video_file_qa_state', 'title_approved');

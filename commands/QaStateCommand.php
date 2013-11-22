@@ -89,13 +89,10 @@ class QaStateCommand extends CConsoleCommand
      *
      * Target schema - {table}_qa_status:
      *  id
-     *  status - varchar values based on statuses: draft,preview,public
+     *  status - varchar values based on scenarios: draft,preview,public
      *  foreach scenario: {scenario}_validation_progress
      *  approval_progress
      *  proofing_progress
-     *  foreach scenario: translations_{scenario}_validation_progress
-     *  translations_approval_progress
-     *  translations_proofing_progress
      *  foreach flag: {flag}
      *  foreach attribute: {attribute}_approved - boolean (with null)
      *  foreach attribute: {attribute}_proofed - boolean (with null)
@@ -168,18 +165,11 @@ class QaStateCommand extends CConsoleCommand
             }
 
             // progress fields
-            foreach ($model->qaStateBehavior()->statuses as $status) {
+            foreach ($model->qaStateBehavior()->scenarios as $status) {
                 $this->ensureColumn($relationTable, $status . '_validation_progress', 'BOOLEAN NULL');
             }
             $this->ensureColumn($relationTable, 'approval_progress', 'INT NULL');
             $this->ensureColumn($relationTable, 'proofing_progress', 'INT NULL');
-
-            // translations progress fields
-            foreach ($model->qaStateBehavior()->statuses as $status) {
-                $this->ensureColumn($relationTable, 'translations_' . $status . '_validation_progress', 'INT NULL');
-            }
-            $this->ensureColumn($relationTable, 'translations_approval_progress', 'INT NULL');
-            $this->ensureColumn($relationTable, 'translations_proofing_progress', 'INT NULL');
 
             // add flags
             foreach ($model->qaStateBehavior()->manualFlags as $manualFlag) {

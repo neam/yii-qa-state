@@ -11,13 +11,19 @@ class QaStateBehavior extends CActiveRecordBehavior
 {
 
     /**
-     * The different statuses the item can have during the qa process
+     * The different scenarios this behavior should track validation progress of
      * @var array
      */
-    public $statuses = array(
+    public $scenarios = array(
         'draft',
         'preview',
-        'public'
+        'public',
+        /* Example: tracking translation progress through language-specific validation scenarios? Add the scenarios through configuration:
+        'translate_into_es',
+        'translate_into_de',
+        'translate_into_fr',
+        'translate_into_sv',
+        */
     );
 
     /**
@@ -45,7 +51,7 @@ class QaStateBehavior extends CActiveRecordBehavior
 
         if (is_null($status)) {
             // those that are part of the final status will include all attributes
-            $status = $this->statuses[count($this->statuses) - 1];
+            $status = $this->scenarios[count($this->scenarios) - 1];
         }
 
         $this->qaAttributes = $this->scenarioSpecificAttributes($status);
@@ -224,7 +230,7 @@ class QaStateBehavior extends CActiveRecordBehavior
         }
 
         // Check validation progress
-        foreach ($this->statuses as $scenario) {
+        foreach ($this->scenarios as $scenario) {
             $progress = $this->calculateValidationProgress($scenario);
             // Assign progress
             $attribute = "{$scenario}_validation_progress";
