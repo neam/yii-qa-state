@@ -7,7 +7,7 @@ Used in content management systems to aid tracking completion progress of publis
 Features
 --------
 
- * Supplies a convenient place to store the approval and proofreading flags for attributes that are part of the content creation process
+ * Supplies a convenient place to store the current overall status as well as approval and proofreading flags for attributes that are part of the content creation process
  * Methods to calculate and read the current validation, approval and proofreading progress
  * Stores the current progress of any validation scenarios, so that content items can be listed/filtered based on how close/far to completion they are
  * Leverages Yii validation logic as the fundamental method of validating the fields
@@ -170,6 +170,7 @@ Sample migration file:
                     ));
             $this->addColumn('chapter', 'chapter_qa_state_id', 'BIGINT NULL');
             $this->addForeignKey('chapter_qa_state_id_fk', 'chapter', 'chapter_qa_state_id', 'chapter_qa_state', 'id', 'SET NULL', 'SET NULL');
+            $this->addColumn('chapter_qa_state', 'status', 'VARCHAR(255) NULL');
             $this->addColumn('chapter_qa_state', 'draft_validation_progress', 'BOOLEAN NULL');
             $this->addColumn('chapter_qa_state', 'preview_validation_progress', 'BOOLEAN NULL');
             $this->addColumn('chapter_qa_state', 'public_validation_progress', 'BOOLEAN NULL');
@@ -202,6 +203,7 @@ Sample migration file:
                     ));
             $this->addColumn('video_file', 'video_file_qa_state_id', 'BIGINT NULL');
             $this->addForeignKey('video_file_qa_state_id_fk', 'video_file', 'video_file_qa_state_id', 'video_file_qa_state', 'id', 'SET NULL', 'SET NULL');
+            $this->addColumn('video_file_qa_state', 'status', 'VARCHAR(255) NULL');
             $this->addColumn('video_file_qa_state', 'draft_validation_progress', 'BOOLEAN NULL');
             $this->addColumn('video_file_qa_state', 'preview_validation_progress', 'BOOLEAN NULL');
             $this->addColumn('video_file_qa_state', 'public_validation_progress', 'BOOLEAN NULL');
@@ -228,6 +230,7 @@ Sample migration file:
           $this->dropForeignKey('chapter_qa_state_id_fk', 'chapter');
           $this->dropColumn('chapter', 'chapter_qa_state_id');
           $this->dropTable('chapter_qa_state');
+          $this->dropColumn('chapter_qa_state', 'status');
           $this->dropColumn('chapter_qa_state', 'draft_validation_progress');
           $this->dropColumn('chapter_qa_state', 'preview_validation_progress');
           $this->dropColumn('chapter_qa_state', 'public_validation_progress');
@@ -257,6 +260,7 @@ Sample migration file:
           $this->dropForeignKey('video_file_qa_state_id_fk', 'video_file');
           $this->dropColumn('video_file', 'video_file_qa_state_id');
           $this->dropTable('video_file_qa_state');
+          $this->dropColumn('video_file_qa_state', 'status');
           $this->dropColumn('video_file_qa_state', 'draft_validation_progress');
           $this->dropColumn('video_file_qa_state', 'preview_validation_progress');
           $this->dropColumn('video_file_qa_state', 'public_validation_progress');
