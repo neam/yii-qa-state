@@ -129,7 +129,7 @@ This will add the relevant tables, relations and fields to be able to track the 
 
 The schema has this general structure:
 
-    {table}_qa_status
+    {table}_qa_state
         id
         status - varchar values based on statuses: draft,preview,public
         foreach status: {status}_validation_progress
