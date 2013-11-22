@@ -1,19 +1,19 @@
 Yii Extension: QaState
 ==========================
 
-Tools (a behavior and a console command) to track proofreading and approval progress on a field-by-field basis.
-Used in content management systems to help track the creation and translation progress of the created content.
+Tools (a behavior and a console command) to track and store validation progress as well as proofreading and approval progress on a field-by-field basis.
+Used in content management systems to aid tracking completion progress of publishing workflows such as creation, draft, review, approval, proofreading, translation etc.
 
 Features
 --------
 
  * Supplies a convenient place to store the approval and proofreading flags for attributes that are part of the content creation process
  * Methods to calculate and read the current validation, approval and proofreading progress
- * Transparent qa state records creation
+ * Stores the current progress of any validation scenarios, so that content items can be listed/filtered based on how close/far to completion they are
  * Leverages Yii validation logic as the fundamental method of validating the fields
  * Leverages Gii code generation to provide CRUD operations to set and change flags
- * (Optional) Leverages Yii extension [i18n-columns](http://www.yiiframework.com/extension/i18n-columns/) to provide individual quality assurance states for each translation language
  * Console command automatically creates migrations for the necessary database changes
+ * (Optional) Leverages Yii extension [i18n-columns](http://www.yiiframework.com/extension/i18n-columns/) to provide individual quality assurance states for each translation language
 
 Requirements
 ------------------
@@ -110,6 +110,21 @@ The important part is that they are applied on the scenarios that the behavior i
         return array(
             'qa-state' => array(
                  'class' => 'QaStateBehavior',
+                 'scenarios' => array(
+                       'draft',
+                       'preview',
+                       'public',
+                       /* Example: tracking translation progress through language-specific validation scenarios? Add the scenarios through configuration:
+                       'translate_into_es',
+                       'translate_into_de',
+                       'translate_into_fr',
+                       'translate_into_sv',
+                       */
+                 ),
+                 'manualFlags' => array(
+                       'previewing_welcome',
+                       'candidate_for_public_status'
+                 ),
             ),
         );
     }
