@@ -131,7 +131,10 @@ class QaStateCommand extends CConsoleCommand
             }
 
             // Ensure there is a field for the qa_state table fk
-            if (!$this->_checkTableAndColumnExists($model->tableName(), $relationField)) {
+            // The column may be supplied by i18n-columns behavior.
+            $columnExists = $this->_checkTableAndColumnExists($model->tableName(), $relationField);
+            $i18nColumnExists = isset($behaviors['i18n-columns']) && in_array($relationField, $behaviors['i18n-columns']['translationAttributes']);
+            if (!$columnExists && !$i18nColumnExists) {
 
                 $this->up[] = '$this->addColumn(\'' . $model->tableName() . '\', \'' . $relationField
                     . '\', \'BIGINT NULL\');';
