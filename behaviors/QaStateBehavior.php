@@ -27,6 +27,57 @@ class QaStateBehavior extends CActiveRecordBehavior
     );
 
     /**
+     * The different statuses this behavior should be aware of.
+     *
+     * The configuration format is an array with the status reference (as saved in
+     * the database) as the key and an array with the following options as the value:
+     *
+     *   label     - the label for the UI
+     *   scenarios - array of scenarios that have to validate in order to set a certain status automatically.
+     *               an empty array means that nothing needs to be validated for this status, and is useful for
+     *               default statuses
+     *   type      - automatic|manual determines if the status is automatically calculated and set or set manually
+     *
+     * The status will be set to the last status that validates it's scenarios, and will
+     * be calculated and set automatically unless the current status is a manually set status.
+     *
+     * @var array
+     */
+    public $statuses = array(
+        'new' => array(
+            'label' => 'New',
+            'scenarios' => array(),
+            'type' => self::STATUS_AUTOMATIC,
+        ),
+        'draft' => array(
+            'label' => 'Draft',
+            'scenarios' => array('draft'),
+            'type' => self::STATUS_AUTOMATIC,
+        ),
+        'preview' => array(
+            'label' => 'Preview',
+            'scenarios' => array('preview', 'status_preview'),
+            'type' => self::STATUS_AUTOMATIC,
+        ),
+        'public' => array(
+            'label' => 'Public',
+            'scenarios' => array('public', 'status_public'),
+            'type' => self::STATUS_MANUAL,
+        ),
+        'replaced' => array(
+            'label' => 'Replaced',
+            'type' => self::STATUS_MANUAL,
+        ),
+        'removed' => array(
+            'label' => 'Removed',
+            'type' => self::STATUS_MANUAL,
+        ),
+    );
+
+    const STATUS_AUTOMATIC = 'automatic';
+    const STATUS_MANUAL = 'manual';
+
+    /**
      * Additional flags that are to be manually tracked in the qa process.
      * Used to include attributes to track these flags in the schema.
      * @var array
@@ -220,6 +271,54 @@ class QaStateBehavior extends CActiveRecordBehavior
 
     }
 
+    public function determineAutomaticStatus()
+    {
+        $lastValidStatus = null;
+        foreach ($this->statuses as $status => $options) {
+            if ($options['type'] == self::STATUS_MANUAL || !isset($options['scenarios'])) {
+                continue;
+            }
+            Yii::log("\$this->validStatus($status):" . (int) $this->validStatus($status), 'flow', __METHOD__);
+            if ($this->validStatus($status)) {
+                $lastValidStatus = $status;
+            } else {
+                return $lastValidStatus;
+            }
+        }
+        return $lastValidStatus;
+    }
+
+    public function validStatus($status)
+    {
+        $validates = true;
+        $options = $this->statuses[$status];
+        foreach ($options['scenarios'] as $scenario) {
+            Yii::log("\$this->calculateValidationProgress($scenario):" . (int) $this->calculateValidationProgress($scenario), 'flow', __METHOD__);
+            $progress = $this->calculateValidationProgress($scenario);
+            if ($progress < 100) {
+                $validates = false;
+                break;
+            }
+        }
+        return $validates;
+    }
+
+    public function setAutomaticStatus()
+    {
+        $currentStatus = $this->owner->qaState()->status;
+        if (is_null($currentStatus) || $this->statuses[$currentStatus]['type'] == self::STATUS_AUTOMATIC) {
+            $this->owner->qaState()->status = $this->determineAutomaticStatus();
+        }
+    }
+
+    public function getStatusLabel()
+    {
+        if (is_null($this->owner->qaState()->status)) {
+            return null;
+        }
+        return $this->statuses[$this->owner->qaState()->status]['label'];
+    }
+
     public function refreshQaState($lang = null)
     {
 
@@ -237,6 +336,9 @@ class QaStateBehavior extends CActiveRecordBehavior
             $this->owner->qaState()->$attribute = $progress;
 
         }
+
+        // Set status
+        $this->setAutomaticStatus();
 
         // Save qa state
         if (!$this->owner->qaState()->save()) {

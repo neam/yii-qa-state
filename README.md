@@ -7,6 +7,7 @@ Used in content management systems to aid tracking completion progress of publis
 Features
 --------
 
+ * Automatically sets the current item status (such as New, Draft and Preview) based on validation rules
  * Supplies a convenient place to store the current overall status as well as approval and proofreading flags for attributes that are part of the content creation process
  * Methods to calculate and read the current validation, approval and proofreading progress
  * Stores the current progress of any validation scenarios, so that content items can be listed/filtered based on how close/far to completion they are
@@ -299,6 +300,7 @@ Changelog
 ### 0.1.0
 
 - Initial release
+- Automatically sets the current item status (such as New, Draft and Preview) based on validation rules
 - Supplies a convenient place to store the approval and proofreading flags for attributes that are part of the content creation process
 - Methods to calculate and read the current validation, approval and proofreading progress
 - Transparent qa state records creation
