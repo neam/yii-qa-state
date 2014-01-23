@@ -97,15 +97,19 @@ class QaStateBehavior extends CActiveRecordBehavior
      * Populate qaAttributes from validation rules
      * @return array
      */
-    public function qaAttributes($status = null)
+    public function qaAttributes($scenario = null)
     {
+        // reset before populating anew
+        $this->qaAttributes = array();
 
-        if (is_null($status)) {
-            // those that are part of the final status will include all attributes
-            $status = $this->scenarios[count($this->scenarios) - 1];
+        // include all attributes
+        if (is_null($scenario)) {
+            foreach ($this->scenarios as $scenario) {
+                $this->qaAttributes = array_unique(array_merge($this->qaAttributes, $this->scenarioSpecificAttributes($scenario)));
+            }
+        } else {
+            $this->qaAttributes = $this->scenarioSpecificAttributes($scenario);
         }
-
-        $this->qaAttributes = $this->scenarioSpecificAttributes($status);
 
         return $this->qaAttributes;
     }
