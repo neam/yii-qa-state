@@ -339,14 +339,17 @@ class ' . $migrationName . ' extends CDbMigration
                             }
                         }
                     } catch (ErrorException $e) {
-                        $this->d("\tErrorException: " . $e->getMessage());
-                        break;
+                        $this->d("\tErrorException: " . $e->getMessage() . "\n");
+                        $this->d("\Skipping $file and continuing\n");
+                        continue;
                     } catch (CDbException $e) {
-                        $this->d("\CDbException: " . $e->getMessage());
-                        break;
+                        $this->d("\CDbException: " . $e->getMessage() . "\n");
+                        $this->d("\Skipping $file and continuing\n");
+                        continue;
                     } catch (Exception $e) {
-                        $this->d("\Exception: " . $e->getMessage());
-                        break;
+                        $this->d("\Exception: " . $e->getMessage() . "\n");
+                        $this->d("\Skipping $file and continuing\n");
+                        continue;
                     }
                 }
             }
