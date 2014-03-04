@@ -166,7 +166,7 @@ class QaStateCommand extends CConsoleCommand
 
             // progress fields
             foreach ($model->qaStateBehavior()->scenarios as $status) {
-                $this->ensureColumn($relationTable, $status . '_validation_progress', 'BOOLEAN NULL');
+                $this->ensureColumn($relationTable, $status . '_validation_progress', 'INT NULL');
             }
             $this->ensureColumn($relationTable, 'approval_progress', 'INT NULL');
             $this->ensureColumn($relationTable, 'proofing_progress', 'INT NULL');
