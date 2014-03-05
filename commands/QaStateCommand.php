@@ -9,7 +9,6 @@
  * @license MIT
  * @author See https://github.com/neam/yii-qa-state/graphs/contributors
  */
-
 class QaStateCommand extends CConsoleCommand
 {
     /**
@@ -64,11 +63,8 @@ class QaStateCommand extends CConsoleCommand
      * @param array $args
      * @return bool|int
      */
-    public function run($args)
+    private function load()
     {
-        if (in_array('--verbose', $args)) {
-            $this->_verbose = true;
-        }
 
         // Sqlite check
         if ((Yii::app()->db->schema instanceof CSqliteSchema) !== false) {
@@ -77,15 +73,13 @@ class QaStateCommand extends CConsoleCommand
 
         $this->models = $this->_getModels();
 
-        if (sizeof($this->models) > 0) {
-            $this->_createMigration();
-        } else {
+        if (sizeof($this->models) == 0) {
             throw new CException("Found no models with QaAttributes behavior attached");
         }
     }
 
     /**
-     * Create the migration files
+     * This will add columns and fields necessary for the tracking of the qa state
      *
      * Target schema - {table}_qa_status:
      *  id
@@ -97,13 +91,25 @@ class QaStateCommand extends CConsoleCommand
      *  foreach attribute: {attribute}_approved - boolean (with null)
      *  foreach attribute: {attribute}_proofed - boolean (with null)
      */
-    protected function _createMigration()
+    public function actionProcess($verbose = false)
     {
+        $this->_verbose = $verbose;
+        $this->load();
+
         $this->d("Creating the migration...\n");
         foreach ($this->models as $modelName => $model) {
             $this->d("\t...$modelName: \n");
-
             $behaviors = $model->behaviors();
+            $this->_processModel($modelName, $model);
+        }
+
+        $this->_createMigrationFile();
+    }
+
+    /**
+     */
+    protected function _processModel($modelName, $model)
+    {
 
             $relationTable = $model->tableName() . "_qa_state";
             $relationField = $relationTable . "_id";
@@ -187,9 +193,7 @@ class QaStateCommand extends CConsoleCommand
             }
 
             // todo - check for fields added by earlier versions of this command
-        }
 
-        $this->_createMigrationFile();
     }
 
     protected function ensureColumn($table, $column, $type)
