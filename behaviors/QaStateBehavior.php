@@ -317,7 +317,7 @@ class QaStateBehavior extends CActiveRecordBehavior
 
     public function getStatusLabel()
     {
-        if (is_null($this->owner->qaState()->status)) {
+        if (is_null($this->owner->qaState()->status) || !isset($this->statuses[$this->owner->qaState()->status])) {
             return null;
         }
         return $this->statuses[$this->owner->qaState()->status]['label'];
