@@ -2,7 +2,7 @@ Yii Extension: QaState
 ==========================
 
 Tools (a behavior and a console command) to track and store validation progress as well as proofreading and approval progress on a field-by-field basis.
-Used in content management systems to aid tracking completion progress of publishing workflows such as creation, draft, review, approval, proofreading, translation etc.
+Created for content management systems to aid tracking completion progress of publishing workflows such as creation, draft, review, approval, proofreading, translation etc.
 
 Features
 --------
@@ -132,7 +132,7 @@ The important part is that they are applied on the scenarios that the behavior i
 
 #### 3. Generate the necessary schema migration using the included console command:
 
-`./yiic qa-state`
+`./yiic qa-state process`
 
 Run with `--verbose` to see more details.
 
@@ -300,13 +300,13 @@ Changelog
 ### 0.1.0
 
 - Initial release
-- Automatically sets the current item status (such as Temporary, Draft and Reviewable) based on validation rules
+- Automatically sets the current item status (such as Temporary, Draft, Reviewable and Publishable) based on validation rules
 - Supplies a convenient place to store the approval and proofreading flags for attributes that are part of the content creation process
 - Methods to calculate and read the current validation, approval and proofreading progress
 - Transparent qa state records creation
 - Leverages Yii validation logic as the fundamental method of validating the fields
 - Leverages Gii code generation to provide CRUD operations to set and change flags
-- Leverages Yii extension [i18n-columns](http://www.yiiframework.com/extension/i18n-columns/) to provide individual quality assurance states for each translation language
+- Optional: Leverages Yii extension [i18n-columns](http://www.yiiframework.com/extension/i18n-columns/) to provide individual quality assurance states for each translation language
 - Console command automatically creates migrations for the necessary database changes
 
 FAQ
@@ -314,9 +314,15 @@ FAQ
 
 ### How do I update the schema after having updated my datamodel or the list of attributes that are part of the qa process?
 
-1. Generate the necessary schema migration using the command ./yiic authoringstate schema
-2. Apply the migration using ./yiic migrate
+1. Generate the necessary schema migration using the command `./yiic qa-state process`
+2. Apply the migration using `./yiic migrate`
 3. Generate crud for the new schema
 
-Before generating the crud you might want to remove any fields that are no longer configured to be
-part of the qa process. This is however optional since the behavior will only take into consideration the currently configured attributes.
+Before generating the crud you might want to remove any fields that are no longer configured to be part of the qa process. This is however optional since the behavior will only take into consideration the currently configured attributes. To help out with this task, the action resetAttributes can be used.
+
+Instructions on how to reset and re-populate the attributes in the qa state tables:
+
+ * Run `./yiic qa-state process`
+ * Apply the migration using `./yiic migrate`
+ * Follow the steps 1-3 above
+
