@@ -16,8 +16,8 @@ class QaStateBehavior extends CActiveRecordBehavior
      */
     public $scenarios = array(
         'draft',
-        'preview',
-        'public',
+        'reviewable',
+        'publishable',
         /* Example: tracking translation progress through language-specific validation scenarios? Add the scenarios through configuration:
         'translate_into_es',
         'translate_into_de',
@@ -44,8 +44,8 @@ class QaStateBehavior extends CActiveRecordBehavior
      * @var array
      */
     public $statuses = array(
-        'new' => array(
-            'label' => 'New',
+        'temporary' => array(
+            'label' => 'Temporary',
             'scenarios' => array(),
             'type' => self::STATUS_AUTOMATIC,
         ),
@@ -54,15 +54,15 @@ class QaStateBehavior extends CActiveRecordBehavior
             'scenarios' => array('draft'),
             'type' => self::STATUS_AUTOMATIC,
         ),
-        'preview' => array(
-            'label' => 'Preview',
-            'scenarios' => array('preview', 'status_preview'),
+        'reviewable' => array(
+            'label' => 'Reviewable',
+            'scenarios' => array('reviewable', 'status_reviewable'),
             'type' => self::STATUS_AUTOMATIC,
         ),
-        'public' => array(
-            'label' => 'Public',
-            'scenarios' => array('public', 'status_public'),
-            'type' => self::STATUS_MANUAL,
+        'publishable' => array(
+            'label' => 'Publishable',
+            'scenarios' => array('publishable', 'status_publishable'),
+            'type' => self::STATUS_AUTOMATIC,
         ),
         'replaced' => array(
             'label' => 'Replaced',
@@ -83,8 +83,8 @@ class QaStateBehavior extends CActiveRecordBehavior
      * @var array
      */
     public $manualFlags = array(
-        'previewing_welcome',
-        'candidate_for_public_status'
+        'allow_review',
+        'allow_publishing'
     );
 
     /**

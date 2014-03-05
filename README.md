@@ -7,7 +7,7 @@ Used in content management systems to aid tracking completion progress of publis
 Features
 --------
 
- * Automatically sets the current item status (such as New, Draft and Preview) based on validation rules
+ * Automatically sets the current item status (such as Temporary, Draft, Reviewable and Publishable) based on validation rules
  * Supplies a convenient place to store the current overall status as well as approval and proofreading flags for attributes that are part of the content creation process
  * Methods to calculate and read the current validation, approval and proofreading progress
  * Stores the current progress of any validation scenarios, so that content items can be listed/filtered based on how close/far to completion they are
@@ -79,7 +79,7 @@ If you don't use composer, clone or download this project into /path/to/your/app
 
 ### Configure models to be part of the qa process
 
-#### 1. Set up validation rules in your model, stating what fields are required for draft, preview and public scenarios.
+#### 1. Set up validation rules in your model, stating what fields are required for draft, reviewable and publishable scenarios.
 
 Example:
 
@@ -92,8 +92,8 @@ Example:
         {
             return array_merge(
                 parent::rules(), array(
-                    array('title, slug', 'required', 'on' => 'draft,preview,public'),
-                    array('thumbnail, about, video, teachers_guide, exercises, snapshots, credits', 'required', 'on' => 'public'),
+                    array('title, slug', 'required', 'on' => 'draft,reviewable,publishable'),
+                    array('thumbnail, about, video, teachers_guide, exercises, snapshots, credits', 'required', 'on' => 'publishable'),
                 )
             );
         }
@@ -102,7 +102,7 @@ Example:
 
 This example only uses the validation rule "required", but of course any validation rules can be used.
 The attributes can be ordinary model attributes, relations or virtual attributes that use custom validation rules etc.
-The important part is that they are applied on the scenarios that the behavior is configured to use (default: draft,preview,public).
+The important part is that they are applied on the scenarios that the behavior is configured to use (default: draft,reviewable,publishable).
 
 #### 2. Add the behavior to the models that you want to track qa state and progress of
 
@@ -113,8 +113,8 @@ The important part is that they are applied on the scenarios that the behavior i
                  'class' => 'QaStateBehavior',
                  'scenarios' => array(
                        'draft',
-                       'preview',
-                       'public',
+                       'reviewable',
+                       'publishable',
                        /* Example: tracking translation progress through language-specific validation scenarios? Add the scenarios through configuration:
                        'translate_into_es',
                        'translate_into_de',
@@ -123,8 +123,8 @@ The important part is that they are applied on the scenarios that the behavior i
                        */
                  ),
                  'manualFlags' => array(
-                       'previewing_welcome',
-                       'candidate_for_public_status'
+                       'allow_review',
+                       'allow_publishing'
                  ),
             ),
         );
@@ -173,12 +173,12 @@ Sample migration file:
             $this->addForeignKey('chapter_qa_state_id_fk', 'chapter', 'chapter_qa_state_id', 'chapter_qa_state', 'id', 'SET NULL', 'SET NULL');
             $this->addColumn('chapter_qa_state', 'status', 'VARCHAR(255) NULL');
             $this->addColumn('chapter_qa_state', 'draft_validation_progress', 'BOOLEAN NULL');
-            $this->addColumn('chapter_qa_state', 'preview_validation_progress', 'BOOLEAN NULL');
-            $this->addColumn('chapter_qa_state', 'public_validation_progress', 'BOOLEAN NULL');
+            $this->addColumn('chapter_qa_state', 'reviewable_validation_progress', 'BOOLEAN NULL');
+            $this->addColumn('chapter_qa_state', 'publishable_validation_progress', 'BOOLEAN NULL');
             $this->addColumn('chapter_qa_state', 'approval_progress', 'INT NULL');
             $this->addColumn('chapter_qa_state', 'proofing_progress', 'INT NULL');
-            $this->addColumn('chapter_qa_state', 'previewing_welcome', 'BOOLEAN NULL');
-            $this->addColumn('chapter_qa_state', 'candidate_for_public_status', 'BOOLEAN NULL');
+            $this->addColumn('chapter_qa_state', 'allow_review', 'BOOLEAN NULL');
+            $this->addColumn('chapter_qa_state', 'allow_publishing', 'BOOLEAN NULL');
             $this->addColumn('chapter_qa_state', 'title_approved', 'BOOLEAN NULL');
             $this->addColumn('chapter_qa_state', 'slug_approved', 'BOOLEAN NULL');
             $this->addColumn('chapter_qa_state', 'thumbnail_approved', 'BOOLEAN NULL');
@@ -206,12 +206,12 @@ Sample migration file:
             $this->addForeignKey('video_file_qa_state_id_fk', 'video_file', 'video_file_qa_state_id', 'video_file_qa_state', 'id', 'SET NULL', 'SET NULL');
             $this->addColumn('video_file_qa_state', 'status', 'VARCHAR(255) NULL');
             $this->addColumn('video_file_qa_state', 'draft_validation_progress', 'BOOLEAN NULL');
-            $this->addColumn('video_file_qa_state', 'preview_validation_progress', 'BOOLEAN NULL');
-            $this->addColumn('video_file_qa_state', 'public_validation_progress', 'BOOLEAN NULL');
+            $this->addColumn('video_file_qa_state', 'reviewable_validation_progress', 'BOOLEAN NULL');
+            $this->addColumn('video_file_qa_state', 'publishable_validation_progress', 'BOOLEAN NULL');
             $this->addColumn('video_file_qa_state', 'approval_progress', 'INT NULL');
             $this->addColumn('video_file_qa_state', 'proofing_progress', 'INT NULL');
-            $this->addColumn('video_file_qa_state', 'previewing_welcome', 'BOOLEAN NULL');
-            $this->addColumn('video_file_qa_state', 'candidate_for_public_status', 'BOOLEAN NULL');
+            $this->addColumn('video_file_qa_state', 'allow_review', 'BOOLEAN NULL');
+            $this->addColumn('video_file_qa_state', 'allow_publishing', 'BOOLEAN NULL');
             $this->addColumn('video_file_qa_state', 'title_approved', 'BOOLEAN NULL');
             $this->addColumn('video_file_qa_state', 'slug_approved', 'BOOLEAN NULL');
             $this->addColumn('video_file_qa_state', 'clip_approved', 'BOOLEAN NULL');
@@ -233,12 +233,12 @@ Sample migration file:
           $this->dropTable('chapter_qa_state');
           $this->dropColumn('chapter_qa_state', 'status');
           $this->dropColumn('chapter_qa_state', 'draft_validation_progress');
-          $this->dropColumn('chapter_qa_state', 'preview_validation_progress');
-          $this->dropColumn('chapter_qa_state', 'public_validation_progress');
+          $this->dropColumn('chapter_qa_state', 'reviewable_validation_progress');
+          $this->dropColumn('chapter_qa_state', 'publishable_validation_progress');
           $this->dropColumn('chapter_qa_state', 'approval_progress');
           $this->dropColumn('chapter_qa_state', 'proofing_progress');
-          $this->dropColumn('chapter_qa_state', 'previewing_welcome');
-          $this->dropColumn('chapter_qa_state', 'candidate_for_public_status');
+          $this->dropColumn('chapter_qa_state', 'allow_review');
+          $this->dropColumn('chapter_qa_state', 'allow_publishing');
           $this->dropColumn('chapter_qa_state', 'title_approved');
           $this->dropColumn('chapter_qa_state', 'slug_approved');
           $this->dropColumn('chapter_qa_state', 'thumbnail_approved');
@@ -263,12 +263,12 @@ Sample migration file:
           $this->dropTable('video_file_qa_state');
           $this->dropColumn('video_file_qa_state', 'status');
           $this->dropColumn('video_file_qa_state', 'draft_validation_progress');
-          $this->dropColumn('video_file_qa_state', 'preview_validation_progress');
-          $this->dropColumn('video_file_qa_state', 'public_validation_progress');
+          $this->dropColumn('video_file_qa_state', 'reviewable_validation_progress');
+          $this->dropColumn('video_file_qa_state', 'publishable_validation_progress');
           $this->dropColumn('video_file_qa_state', 'approval_progress');
           $this->dropColumn('video_file_qa_state', 'proofing_progress');
-          $this->dropColumn('video_file_qa_state', 'previewing_welcome');
-          $this->dropColumn('video_file_qa_state', 'candidate_for_public_status');
+          $this->dropColumn('video_file_qa_state', 'allow_review');
+          $this->dropColumn('video_file_qa_state', 'allow_publishing');
           $this->dropColumn('video_file_qa_state', 'title_approved');
           $this->dropColumn('video_file_qa_state', 'slug_approved');
           $this->dropColumn('video_file_qa_state', 'clip_approved');
@@ -300,7 +300,7 @@ Changelog
 ### 0.1.0
 
 - Initial release
-- Automatically sets the current item status (such as New, Draft and Preview) based on validation rules
+- Automatically sets the current item status (such as Temporary, Draft and Reviewable) based on validation rules
 - Supplies a convenient place to store the approval and proofreading flags for attributes that are part of the content creation process
 - Methods to calculate and read the current validation, approval and proofreading progress
 - Transparent qa state records creation

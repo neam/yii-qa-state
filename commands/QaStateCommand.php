@@ -89,7 +89,7 @@ class QaStateCommand extends CConsoleCommand
      *
      * Target schema - {table}_qa_status:
      *  id
-     *  status - varchar values based on scenarios: draft,preview,public
+     *  status - varchar values based on scenarios: draft,reviewable,publishable
      *  foreach scenario: {scenario}_validation_progress
      *  approval_progress
      *  proofing_progress
