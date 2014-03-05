@@ -115,7 +115,7 @@ The important part is that they are applied on the scenarios that the behavior i
                        'draft',
                        'reviewable',
                        'publishable',
-                       /* Example: tracking translation progress through language-specific validation scenarios? Add the scenarios through configuration:
+                       /* Example: tracking translation progress through language-specific validation scenarios - add the scenarios through configuration:
                        'translate_into_es',
                        'translate_into_de',
                        'translate_into_fr',
@@ -124,7 +124,7 @@ The important part is that they are applied on the scenarios that the behavior i
                  ),
                  'manualFlags' => array(
                        'allow_review',
-                       'allow_publishing'
+                       'allow_publish'
                  ),
             ),
         );
@@ -178,7 +178,7 @@ Sample migration file:
             $this->addColumn('chapter_qa_state', 'approval_progress', 'INT NULL');
             $this->addColumn('chapter_qa_state', 'proofing_progress', 'INT NULL');
             $this->addColumn('chapter_qa_state', 'allow_review', 'BOOLEAN NULL');
-            $this->addColumn('chapter_qa_state', 'allow_publishing', 'BOOLEAN NULL');
+            $this->addColumn('chapter_qa_state', 'allow_publish', 'BOOLEAN NULL');
             $this->addColumn('chapter_qa_state', 'title_approved', 'BOOLEAN NULL');
             $this->addColumn('chapter_qa_state', 'slug_approved', 'BOOLEAN NULL');
             $this->addColumn('chapter_qa_state', 'thumbnail_approved', 'BOOLEAN NULL');
@@ -211,7 +211,7 @@ Sample migration file:
             $this->addColumn('video_file_qa_state', 'approval_progress', 'INT NULL');
             $this->addColumn('video_file_qa_state', 'proofing_progress', 'INT NULL');
             $this->addColumn('video_file_qa_state', 'allow_review', 'BOOLEAN NULL');
-            $this->addColumn('video_file_qa_state', 'allow_publishing', 'BOOLEAN NULL');
+            $this->addColumn('video_file_qa_state', 'allow_publish', 'BOOLEAN NULL');
             $this->addColumn('video_file_qa_state', 'title_approved', 'BOOLEAN NULL');
             $this->addColumn('video_file_qa_state', 'slug_approved', 'BOOLEAN NULL');
             $this->addColumn('video_file_qa_state', 'clip_approved', 'BOOLEAN NULL');
@@ -238,7 +238,7 @@ Sample migration file:
           $this->dropColumn('chapter_qa_state', 'approval_progress');
           $this->dropColumn('chapter_qa_state', 'proofing_progress');
           $this->dropColumn('chapter_qa_state', 'allow_review');
-          $this->dropColumn('chapter_qa_state', 'allow_publishing');
+          $this->dropColumn('chapter_qa_state', 'allow_publish');
           $this->dropColumn('chapter_qa_state', 'title_approved');
           $this->dropColumn('chapter_qa_state', 'slug_approved');
           $this->dropColumn('chapter_qa_state', 'thumbnail_approved');
@@ -268,7 +268,7 @@ Sample migration file:
           $this->dropColumn('video_file_qa_state', 'approval_progress');
           $this->dropColumn('video_file_qa_state', 'proofing_progress');
           $this->dropColumn('video_file_qa_state', 'allow_review');
-          $this->dropColumn('video_file_qa_state', 'allow_publishing');
+          $this->dropColumn('video_file_qa_state', 'allow_publish');
           $this->dropColumn('video_file_qa_state', 'title_approved');
           $this->dropColumn('video_file_qa_state', 'slug_approved');
           $this->dropColumn('video_file_qa_state', 'clip_approved');

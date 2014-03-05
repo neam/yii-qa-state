@@ -84,7 +84,7 @@ class QaStateBehavior extends CActiveRecordBehavior
      */
     public $manualFlags = array(
         'allow_review',
-        'allow_publishing'
+        'allow_publish'
     );
 
     /**
