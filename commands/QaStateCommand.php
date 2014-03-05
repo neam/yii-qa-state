@@ -111,88 +111,88 @@ class QaStateCommand extends CConsoleCommand
     protected function _processModel($modelName, $model)
     {
 
-            $relationTable = $model->tableName() . "_qa_state";
-            $relationField = $relationTable . "_id";
+        $relationTable = $model->tableName() . "_qa_state";
+        $relationField = $relationTable . "_id";
 
-            $qaAttributes = $model->qaStateBehavior()->qaAttributes();
+        $qaAttributes = $model->qaStateBehavior()->qaAttributes();
 
-            // Do not activate for models without any attributes to include in the qa process
-            if (empty($qaAttributes)) {
-                $this->d("\t\tNote: $modelName has no attributes to include in the qa process - skipping...\n");
-                continue;
-            }
+        // Do not activate for models without any attributes to include in the qa process
+        if (empty($qaAttributes)) {
+            $this->d("\t\tNote: $modelName has no attributes to include in the qa process - skipping...\n");
+            continue;
+        }
 
-            // Ensure there is a table
-            $tables = Yii::app()->db->schema->getTables();
-            if (!isset($tables[$relationTable])) {
+        // Ensure there is a table
+        $tables = Yii::app()->db->schema->getTables();
+        if (!isset($tables[$relationTable])) {
 
-                $this->up[] = '$this->createTable(\'' . $relationTable . '\', array(
+            $this->up[] = '$this->createTable(\'' . $relationTable . '\', array(
                     \'id\' => \'BIGINT NOT NULL AUTO_INCREMENT\',
                     \'PRIMARY KEY (`id`)\',
                 ));';
 
-            }
+        }
 
-            // Ensure there is a field for the qa_state table fk
-            // The column may be supplied by i18n-columns behavior.
-            $columnExists = $this->_checkTableAndColumnExists($model->tableName(), $relationField);
-            $i18nColumnExists = isset($behaviors['i18n-columns']) && in_array($relationField, $behaviors['i18n-columns']['translationAttributes']);
-            if (!$columnExists && !$i18nColumnExists) {
+        // Ensure there is a field for the qa_state table fk
+        // The column may be supplied by i18n-columns behavior.
+        $columnExists = $this->_checkTableAndColumnExists($model->tableName(), $relationField);
+        $i18nColumnExists = isset($behaviors['i18n-columns']) && in_array($relationField, $behaviors['i18n-columns']['translationAttributes']);
+        if (!$columnExists && !$i18nColumnExists) {
 
-                $this->up[] = '$this->addColumn(\'' . $model->tableName() . '\', \'' . $relationField
-                    . '\', \'BIGINT NULL\');';
-                $this->up[] = '$this->addForeignKey(\'' . $relationField . '_fk'
-                    . '\', \'' . $model->tableName()
-                    . '\', \'' . $relationField
-                    . '\', \'' . $relationTable
-                    . '\', \'' . 'id'
-                    . '\', \'' . 'SET NULL'
-                    . '\', \'' . 'SET NULL' . '\');';
+            $this->up[] = '$this->addColumn(\'' . $model->tableName() . '\', \'' . $relationField
+                . '\', \'BIGINT NULL\');';
+            $this->up[] = '$this->addForeignKey(\'' . $relationField . '_fk'
+                . '\', \'' . $model->tableName()
+                . '\', \'' . $relationField
+                . '\', \'' . $relationTable
+                . '\', \'' . 'id'
+                . '\', \'' . 'SET NULL'
+                . '\', \'' . 'SET NULL' . '\');';
 
-                $this->down[] = '$this->dropForeignKey(\'' . $relationField . '_fk'
-                    . '\', \'' . $model->tableName() . '\');';
-                $this->down[] = '$this->dropColumn(\'' . $model->tableName() . '\', \'' . $relationField . '\');';
+            $this->down[] = '$this->dropForeignKey(\'' . $relationField . '_fk'
+                . '\', \'' . $model->tableName() . '\');';
+            $this->down[] = '$this->dropColumn(\'' . $model->tableName() . '\', \'' . $relationField . '\');';
 
-            }
+        }
 
-            if (!isset($tables[$relationTable])) {
+        if (!isset($tables[$relationTable])) {
 
-                $this->down[] = '$this->dropTable(\'' . $relationTable . '\');';
+            $this->down[] = '$this->dropTable(\'' . $relationTable . '\');';
 
-            }
+        }
 
-            // add status column
-            if (!$this->_checkTableAndColumnExists($relationTable, 'status')) {
+        // add status column
+        if (!$this->_checkTableAndColumnExists($relationTable, 'status')) {
 
-                $this->up[] = '$this->addColumn(\'' . $relationTable . '\', \'' . 'status'
-                    . '\', \'VARCHAR(255) NULL\');';
-                $this->down[] = '$this->dropColumn(\'' . $relationTable . '\', \'' . 'status' . '\');';
+            $this->up[] = '$this->addColumn(\'' . $relationTable . '\', \'' . 'status'
+                . '\', \'VARCHAR(255) NULL\');';
+            $this->down[] = '$this->dropColumn(\'' . $relationTable . '\', \'' . 'status' . '\');';
 
-            }
+        }
 
-            // progress fields
-            foreach ($model->qaStateBehavior()->scenarios as $status) {
-                $this->ensureColumn($relationTable, $status . '_validation_progress', 'INT NULL');
-            }
-            $this->ensureColumn($relationTable, 'approval_progress', 'INT NULL');
-            $this->ensureColumn($relationTable, 'proofing_progress', 'INT NULL');
+        // progress fields
+        foreach ($model->qaStateBehavior()->scenarios as $status) {
+            $this->ensureColumn($relationTable, $status . '_validation_progress', 'INT NULL');
+        }
+        $this->ensureColumn($relationTable, 'approval_progress', 'INT NULL');
+        $this->ensureColumn($relationTable, 'proofing_progress', 'INT NULL');
 
-            // add flags
-            foreach ($model->qaStateBehavior()->manualFlags as $manualFlag) {
-                $this->ensureColumn($relationTable, $manualFlag, 'BOOLEAN NULL');
-            }
+        // add flags
+        foreach ($model->qaStateBehavior()->manualFlags as $manualFlag) {
+            $this->ensureColumn($relationTable, $manualFlag, 'BOOLEAN NULL');
+        }
 
-            // add attribute approval fields
-            foreach ($qaAttributes as $attribute) {
-                $this->ensureColumn($relationTable, $attribute . '_approved', 'BOOLEAN NULL');
-            }
+        // add attribute approval fields
+        foreach ($qaAttributes as $attribute) {
+            $this->ensureColumn($relationTable, $attribute . '_approved', 'BOOLEAN NULL');
+        }
 
-            // add attribute proof fields
-            foreach ($qaAttributes as $attribute) {
-                $this->ensureColumn($relationTable, $attribute . '_proofed', 'BOOLEAN NULL');
-            }
+        // add attribute proof fields
+        foreach ($qaAttributes as $attribute) {
+            $this->ensureColumn($relationTable, $attribute . '_proofed', 'BOOLEAN NULL');
+        }
 
-            // todo - check for fields added by earlier versions of this command
+        // todo - check for fields added by earlier versions of this command
 
     }
 
@@ -206,6 +206,51 @@ class QaStateCommand extends CConsoleCommand
             $this->down[] = '$this->dropColumn(\'' . $table . '\', \'' . $column . '\');';
 
         }
+
+    }
+
+    protected function dropColumn($table, $column)
+    {
+
+        if ($this->_checkTableAndColumnExists($table, $column)) {
+
+            $this->up[] = '$this->dropColumn(\'' . $table . '\', \'' . $column . '\');';
+
+        }
+
+    }
+
+    /**
+     * Will drop all attributes in the qa state tables except for 'id'.
+     * Instructions on how to reset and re-populate the attributes in the qa state tables:
+     * Run this command, apply migration and then run the process command anew.
+     * This may come in useful after qa state behavior configuration has changed in order to prevent
+     * unused fields being left in the qa state tables.
+     *
+     * @param $model
+     * @param $attribute
+     */
+    public function actionResetAttributes($verbose = false)
+    {
+        $this->_verbose = $verbose;
+        $this->load();
+
+        $tables = Yii::app()->db->schema->getTables();
+
+        $this->d("Creating the migration...\n");
+        foreach ($this->models as $modelName => $model) {
+            $this->d("\t...$modelName: \n");
+            $relationTable = $model->tableName() . "_qa_state";
+            foreach (array_keys($tables[$relationTable]->columns) as $attribute) {
+                if ($attribute == "id") {
+                    continue;
+                }
+                $this->dropColumn($relationTable, $attribute);
+            }
+        }
+
+        $this->_createMigrationFile();
+
 
     }
 
