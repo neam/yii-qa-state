@@ -310,7 +310,7 @@ class QaStateBehavior extends CActiveRecordBehavior
     public function setAutomaticStatus()
     {
         $currentStatus = $this->owner->qaState()->status;
-        if (is_null($currentStatus) || $this->statuses[$currentStatus]['type'] == self::STATUS_AUTOMATIC) {
+        if (is_null($currentStatus) || !isset($this->statuses[$currentStatus]) || $this->statuses[$currentStatus]['type'] === self::STATUS_AUTOMATIC) {
             $this->owner->qaState()->status = $this->determineAutomaticStatus();
         }
     }
