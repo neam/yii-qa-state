@@ -272,6 +272,18 @@ class QaStateBehavior extends CActiveRecordBehavior
             // We must specifically set the scenario here. Any other place above and it will/may revert back to the owner's scenario (Probably due to something fishy regarding the way the "edited" flavor is cloned)
             $model->setScenario($scenario);
             $valid = $model->validate(array($attribute));
+            // The validation logic can be tricky to debug. Here is some aid:
+            // Create a global function inspect() that sends the first argument to a debug output
+            // (such as Yii::log, codecept_debug, var_dump, or similar), then enable the below
+            // temporarily for relevant debugging output
+            if (false) {
+                inspect("The scenario, attribute and validity:");
+                inspect(compact("scenario", "attribute", "valid"));
+                inspect("The attribute value:");
+                inspect(json_encode($model->$attribute));
+                inspect("The validation error:");
+                inspect($model->getError($attribute));
+            }
             if (!$valid) {
                 $invalidFields++;
             }
