@@ -257,7 +257,11 @@ class QaStateBehavior extends CActiveRecordBehavior
 
         // Work on a clone to not interfere with existing attributes and validation errors
         $model = clone $this->owner;
-        $model->scenario = $scenario;
+
+        // Make sure we use the "edited" flavor of the item when we calculate translation progress so that language fallback contents is not considered valid translations
+        if ($model->asa('i18n-attribute-messages') !== null) {
+            $model = $model->edited();
+        }
 
         // Count fields
         $attributes = $this->scenarioSpecificAttributes($scenario);
@@ -265,6 +269,8 @@ class QaStateBehavior extends CActiveRecordBehavior
 
         // Validate each field individually
         foreach ($attributes as $attribute) {
+            // We must specifically set the scenario here. Any other place above and it will/may revert back to the owner's scenario (Probably due to something fishy regarding the way the "edited" flavor is cloned)
+            $model->setScenario($scenario);
             $valid = $model->validate(array($attribute));
             if (!$valid) {
                 $invalidFields++;
