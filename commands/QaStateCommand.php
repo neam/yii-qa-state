@@ -74,7 +74,7 @@ class QaStateCommand extends CConsoleCommand
         $this->models = $this->_getModels();
 
         if (sizeof($this->models) == 0) {
-            throw new CException("Found no models with QaAttributes behavior attached");
+            throw new CException("Found no models with QaStateBehavior behavior attached");
         }
     }
 
