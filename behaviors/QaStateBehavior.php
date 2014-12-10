@@ -341,7 +341,12 @@ class QaStateBehavior extends CActiveRecordBehavior
         return $this->statuses[$this->owner->qaState()->status]['label'];
     }
 
-    public function refreshQaState($lang = null)
+    /**
+     * @param array $scenarios Array of $scenarios to consider. If not specified, all scenarios will be recalculated, which may take quite some time
+     * @param null $lang
+     * @throws CException
+     */
+    public function refreshQaState($scenarios = null, $lang = null)
     {
 
         // Set app language temporarily to whatever language we want to validate with
@@ -351,7 +356,11 @@ class QaStateBehavior extends CActiveRecordBehavior
         }
 
         // Check validation progress
-        foreach ($this->scenarios as $scenario) {
+        if (is_null($scenarios)) {
+            $scenarios = $this->scenarios;
+        }
+
+        foreach ($scenarios as $scenario) {
             $progress = $this->calculateValidationProgress($scenario);
             // Assign progress
             $attribute = "{$scenario}_validation_progress";
