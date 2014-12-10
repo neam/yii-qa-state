@@ -274,7 +274,7 @@ class QaStateBehavior extends CActiveRecordBehavior
     public function calculateInvalidFields($scenario)
     {
         static $_cache;
-        $key = $this->ownerCacheKey() . ":" . $scenario;
+        $key = $this->currentExecutionOwnerCacheKey() . ":" . $scenario;
 
         // Use in-memory cache if available
         if (isset($_cache[$key])) {
@@ -380,6 +380,9 @@ class QaStateBehavior extends CActiveRecordBehavior
     public function refreshQaState($scenarios = null, $lang = null)
     {
 
+        // A random cache key is used to prevent multiple re-calculations within the refresh of a qa state
+        $this->resetExecutionCacheKey();
+
         // Set app language temporarily to whatever language we want to validate with
         if (!is_null($lang)) {
             $previousLang = Yii::app()->language;
@@ -416,12 +419,45 @@ class QaStateBehavior extends CActiveRecordBehavior
 
     // Some methods above are time-consuming and benefit from in-memory caching. Below are methods directly related to this caching logic
 
+    /**
+     * Scenario attributes and progress is dependent on owner class, id/new and attribute values.
+     * This cache key allows us to re-use previous certain calculations, even across requests.
+     * Example: scenarioSpecificAttributes does not depend on anything other than these.
+     * @return string
+     */
     protected function ownerCacheKey()
     {
         return get_class($this->owner) .
         "_" .
-        ($this->owner->isNewRecord ? "new" : $this->owner->primaryKey);
+        ($this->owner->isNewRecord ? "new" : $this->owner->primaryKey) .
+        "|attributehash:" . md5(implode(",", $this->owner->attributes));
     }
+
+    /**
+     * Some calculations should only be cached within a certain execution
+     * Example: refreshQaState can be re-calculated multiple times within one request
+     * and each time it should use new calculations.
+     * @return string
+     */
+    protected function currentExecutionOwnerCacheKey()
+    {
+        return $this->ownerCacheKey() . "|executionKey:" . $this->getExecutionCacheKey();
+    }
+
+    protected function getExecutionCacheKey()
+    {
+        if (empty($this->_executionCacheKey)) {
+            throw new CException("Execution cache key must be reset at least once before using it");
+        }
+        return $this->_executionCacheKey;
+    }
+
+    protected function resetExecutionCacheKey()
+    {
+        $this->_executionCacheKey = uniqid();
+    }
+
+    protected $_executionCacheKey = null;
 
 }
 
