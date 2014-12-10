@@ -114,6 +114,12 @@ class QaStateBehavior extends CActiveRecordBehavior
         return $this->qaAttributes;
     }
 
+    /**
+     * Cached version of _scenarioSpecificAttributes()
+     * @see _scenarioSpecificAttributes
+     * @param $scenario
+     * @return array
+     */
     public function scenarioSpecificAttributes($scenario)
     {
         static $_cache;
@@ -408,9 +414,13 @@ class QaStateBehavior extends CActiveRecordBehavior
 
     }
 
+    // Some methods above are time-consuming and benefit from in-memory caching. Below are methods directly related to this caching logic
+
     protected function ownerCacheKey()
     {
-        return get_class($this->owner) . "_" . ($this->owner->isNewRecord ? "new" : $this->owner->primaryKey);
+        return get_class($this->owner) .
+        "_" .
+        ($this->owner->isNewRecord ? "new" : $this->owner->primaryKey);
     }
 
 }
