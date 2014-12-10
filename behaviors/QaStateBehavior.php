@@ -279,6 +279,42 @@ class QaStateBehavior extends CActiveRecordBehavior
 
         // Count fields
         $attributes = $this->scenarioSpecificAttributes($scenario);
+        $invalidFieldsCount = $this->invalidFieldsCount($model, $scenario, $attributes);
+
+        return $invalidFieldsCount;
+
+    }
+
+    protected function invalidFieldsCount($model, $scenario, $attributes, &$errors = array())
+    {
+        $errors2 = null;
+        $invalidFieldsCount = $this->invalidFieldsCount_validateEachFieldIndividually($model, $scenario, $attributes, $errors);
+        $invalidFieldsCount2 = $this->invalidFieldsCount_validateInBulk($model, $scenario, $attributes, $errors2);
+        if ($invalidFieldsCount <> $invalidFieldsCount2) {
+            var_dump($invalidFieldsCount, $invalidFieldsCount2, $errors, $errors2);
+            throw new CException("invalidFieldsCount_validateEachFieldIndividually and invalidFieldsCount_validateInBulk returned different results");
+        }
+        return $invalidFieldsCount;
+    }
+
+    protected function invalidFieldsCount_validateInBulk($model, $scenario, $attributes, &$errors = array())
+    {
+
+        $model->setScenario($scenario);
+        $valid = $model->validate($attributes);
+        if ($valid) {
+            return 0;
+        } else {
+            $errors = $model->getErrors();
+            $invalidFields = array_keys($errors);
+            return count($invalidFields);
+        }
+
+    }
+
+    protected function invalidFieldsCount_validateEachFieldIndividually($model, $scenario, $attributes, &$errors = array())
+    {
+
         $invalidFields = 0;
 
         // Validate each field individually
@@ -300,6 +336,9 @@ class QaStateBehavior extends CActiveRecordBehavior
             }
             if (!$valid) {
                 $invalidFields++;
+                if (true) {
+                    $errors[$attribute] = array($model->getError($attribute));
+                }
             }
         }
 
