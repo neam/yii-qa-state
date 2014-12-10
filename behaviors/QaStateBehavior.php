@@ -116,6 +116,20 @@ class QaStateBehavior extends CActiveRecordBehavior
 
     public function scenarioSpecificAttributes($scenario)
     {
+        static $_cache;
+        $key = $this->ownerCacheKey() . ":" . $scenario;
+
+        // Use in-memory cache if available
+        if (isset($_cache[$key])) {
+            return $_cache[$key];
+        }
+
+        // Set in-memory cache before returning
+        return $_cache[$key] = $this->_scenarioSpecificAttributes($scenario);
+    }
+
+    protected function _scenarioSpecificAttributes($scenario)
+    {
 
         $attributes = array();
 
@@ -381,6 +395,11 @@ class QaStateBehavior extends CActiveRecordBehavior
             Yii::app()->language = $previousLang;
         }
 
+    }
+
+    protected function ownerCacheKey()
+    {
+        return get_class($this->owner) . "_" . ($this->owner->isNewRecord ? "new" : $this->owner->primaryKey);
     }
 
 }
