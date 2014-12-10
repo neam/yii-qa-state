@@ -260,9 +260,7 @@ class QaStateBehavior extends CActiveRecordBehavior
     }
 
     /**
-     * Steps through all of the fields that are validated in a specific
-     * scenario and returns a percentage 0-100 of the current validation
-     * progress
+     * Returns number of invalid fields in a specific scenario
      * @param $scenario
      * @return int
      */
@@ -287,18 +285,6 @@ class QaStateBehavior extends CActiveRecordBehavior
 
     protected function invalidFieldsCount($model, $scenario, $attributes, &$errors = array())
     {
-        $errors2 = null;
-        $invalidFieldsCount = $this->invalidFieldsCount_validateEachFieldIndividually($model, $scenario, $attributes, $errors);
-        $invalidFieldsCount2 = $this->invalidFieldsCount_validateInBulk($model, $scenario, $attributes, $errors2);
-        if ($invalidFieldsCount <> $invalidFieldsCount2) {
-            var_dump($invalidFieldsCount, $invalidFieldsCount2, $errors, $errors2);
-            throw new CException("invalidFieldsCount_validateEachFieldIndividually and invalidFieldsCount_validateInBulk returned different results");
-        }
-        return $invalidFieldsCount;
-    }
-
-    protected function invalidFieldsCount_validateInBulk($model, $scenario, $attributes, &$errors = array())
-    {
 
         $model->setScenario($scenario);
         $valid = $model->validate($attributes);
@@ -309,40 +295,6 @@ class QaStateBehavior extends CActiveRecordBehavior
             $invalidFields = array_keys($errors);
             return count($invalidFields);
         }
-
-    }
-
-    protected function invalidFieldsCount_validateEachFieldIndividually($model, $scenario, $attributes, &$errors = array())
-    {
-
-        $invalidFields = 0;
-
-        // Validate each field individually
-        foreach ($attributes as $attribute) {
-            // We must specifically set the scenario here. Any other place above and it will/may revert back to the owner's scenario (Probably due to something fishy regarding the way the "edited" flavor is cloned)
-            $model->setScenario($scenario);
-            $valid = $model->validate(array($attribute));
-            // The validation logic can be tricky to debug. Here is some aid:
-            // Create a global function inspect() that sends the first argument to a debug output
-            // (such as Yii::log, codecept_debug, var_dump, or similar), then enable the below
-            // temporarily for relevant debugging output
-            if (false) {
-                inspect("The scenario, attribute and validity:");
-                inspect(compact("scenario", "attribute", "valid"));
-                inspect("The attribute value:");
-                inspect(json_encode($model->$attribute));
-                inspect("The validation error:");
-                inspect($model->getError($attribute));
-            }
-            if (!$valid) {
-                $invalidFields++;
-                if (true) {
-                    $errors[$attribute] = array($model->getError($attribute));
-                }
-            }
-        }
-
-        return $invalidFields;
 
     }
 
