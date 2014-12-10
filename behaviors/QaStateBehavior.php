@@ -260,11 +260,31 @@ class QaStateBehavior extends CActiveRecordBehavior
     }
 
     /**
-     * Returns number of invalid fields in a specific scenario
+     * Cached version of _calculateInvalidFields()
+     * @see _calculateInvalidFields
      * @param $scenario
      * @return int
      */
     public function calculateInvalidFields($scenario)
+    {
+        static $_cache;
+        $key = $this->ownerCacheKey() . ":" . $scenario;
+
+        // Use in-memory cache if available
+        if (isset($_cache[$key])) {
+            return $_cache[$key];
+        }
+
+        // Set in-memory cache before returning
+        return $_cache[$key] = $this->_calculateInvalidFields($scenario);
+    }
+
+    /**
+     * Returns number of invalid fields in a specific scenario
+     * @param $scenario
+     * @return int
+     */
+    public function _calculateInvalidFields($scenario)
     {
 
         // Work on a clone to not interfere with existing attributes and validation errors
