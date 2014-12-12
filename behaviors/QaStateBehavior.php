@@ -247,7 +247,7 @@ class QaStateBehavior extends CActiveRecordBehavior
      * @return float
      * @throws QaStateBehaviorNoAssociatedRulesException Thrown to prevent division with 0
      */
-    public function calculateValidationProgress($scenario)
+    protected function calculateValidationProgress($scenario)
     {
 
         // Count fields
@@ -271,7 +271,7 @@ class QaStateBehavior extends CActiveRecordBehavior
      * @param $scenario
      * @return int
      */
-    public function calculateInvalidFields($scenario)
+    protected function calculateInvalidFields($scenario)
     {
         static $_cache;
         $key = $this->currentExecutionOwnerCacheKey() . ":" . $scenario;
@@ -290,7 +290,7 @@ class QaStateBehavior extends CActiveRecordBehavior
      * @param $scenario
      * @return int
      */
-    public function _calculateInvalidFields($scenario)
+    protected function _calculateInvalidFields($scenario)
     {
 
         // Work on a clone to not interfere with existing attributes and validation errors
@@ -324,7 +324,7 @@ class QaStateBehavior extends CActiveRecordBehavior
 
     }
 
-    public function determineAutomaticStatus()
+    protected function determineAutomaticStatus()
     {
         $lastValidStatus = null;
         foreach ($this->statuses as $status => $options) {
@@ -343,6 +343,12 @@ class QaStateBehavior extends CActiveRecordBehavior
 
     public function validStatus($status)
     {
+
+        // Reset execution cache key so that we can access this public method without internally resetting it first
+        if (empty($this->_executionCacheKey)) {
+            $this->resetExecutionCacheKey();
+        }
+
         $validates = true;
         $options = $this->statuses[$status];
         foreach ($options['scenarios'] as $scenario) {
